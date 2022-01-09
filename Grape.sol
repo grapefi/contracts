@@ -52,7 +52,7 @@ contract Grape is ERC20Burnable, Operator {
 
     // Tax Tiers
     uint256[] public taxTiersTwaps = [0, 5e17, 6e17, 7e17, 8e17, 9e17, 9.5e17, 1e18, 1.05e18, 1.10e18, 1.20e18, 1.30e18, 1.40e18, 1.50e18];
-    uint256[] public taxTiersRates = [2000, 1900, 1800, 1700, 1600, 1500, 1500, 1500, 1500, 1400, 900, 400, 200, 100];
+    uint256[] public taxTiersRates = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
     // Sender addresses excluded from Tax
     mapping(address => bool) public excludedAddresses;
@@ -80,7 +80,7 @@ contract Grape is ERC20Burnable, Operator {
         excludeAddress(address(this));
 
         _mint(msg.sender, 1 ether);
-        taxRate = _taxRate;
+        taxRate = 0;
         taxCollectorAddress = _taxCollectorAddress;
     }
 
@@ -169,7 +169,7 @@ contract Grape is ERC20Burnable, Operator {
     function setTaxRate(uint256 _taxRate) public onlyTaxOffice {
         require(!autoCalculateTax, "auto calculate tax cannot be enabled");
         require(_taxRate < 10000, "tax equal or bigger to 100%");
-        taxRate = _taxRate;
+        taxRate = 0;
     }
 
     function excludeAddress(address _address) public onlyOperatorOrTaxOffice returns (bool) {
@@ -238,7 +238,7 @@ contract Grape is ERC20Burnable, Operator {
         uint256 amount,
         bool burnTax
     ) internal returns (bool) {
-        uint256 taxAmount = amount.mul(taxRate).div(10000);
+        uint256 taxAmount = 0;
         uint256 amountAfterTax = amount.sub(taxAmount);
 
         if (burnTax) {
