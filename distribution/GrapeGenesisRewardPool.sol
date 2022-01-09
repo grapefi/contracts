@@ -208,7 +208,7 @@ contract GrapeGenesisRewardPool {
         }
         if (_amount > 0) {
             pool.token.safeTransferFrom(_sender, address(this), _amount);
-            if (address(pool.token) == cake) {
+            if (address(pool.token) == mim) {
                 user.amount = user.amount.add(_amount.mul(9900).div(10000));
             } else {
                 user.amount = user.amount.add(_amount);

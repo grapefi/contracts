@@ -1,2 +1,3 @@
 Grape Finance Solidity Contracts
-- Forked from Tomb Finance
+    Genesis pool contracts are in the distribution folder
+    Many thanks to Tomb Finance and the OG Basis Cash
