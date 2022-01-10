@@ -7,11 +7,10 @@ import "@openzeppelin/contracts/token/ERC20/ERC20Burnable.sol";
 
 import "./owner/Operator.sol";
 
-
-contract GShare is ERC20Burnable, Operator {
+contract Wine is ERC20Burnable, Operator {
     using SafeMath for uint256;
 
-    // TOTAL MAX SUPPLY = 50,000 GSHAREs
+    // TOTAL MAX SUPPLY = 50,000 WINE
     uint256 public constant FARMING_POOL_REWARD_ALLOCATION = 41000 ether;
     uint256 public constant COMMUNITY_FUND_POOL_ALLOCATION = 4500 ether;
     uint256 public constant DEV_FUND_POOL_ALLOCATION = 4500 ether;
@@ -31,7 +30,7 @@ contract GShare is ERC20Burnable, Operator {
 
     bool public rewardPoolDistributed = false;
 
-    constructor(uint256 _startTime, address _communityFund, address _devFund) public ERC20("GSHARE", "GSHARE") {
+    constructor(uint256 _startTime, address _communityFund, address _devFund) public ERC20("Wine Shares", "WINE") {
         _mint(msg.sender, 1 ether); // mint 1 GRAPE Share for initial pools deployment
 
         startTime = _startTime;
