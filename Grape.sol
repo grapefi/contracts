@@ -37,7 +37,7 @@ contract Grape is ERC20Burnable, Operator {
     /**
      * @notice Constructs the GRAPE ERC-20 contract.
      */
-    constructor() public ERC20("grape.finance", "GRAPE") {
+    constructor() public ERC20("Grape Finance", "GRAPE") {
         // Mints 1 GRAPE to contract creator for initial pool setup
         _mint(msg.sender, 1 ether);   
     }
