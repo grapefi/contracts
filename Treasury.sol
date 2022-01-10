@@ -45,7 +45,7 @@ contract Treasury is ContractGuard {
     // core components
     address public grape;
     address public gbond;
-    address public gshare;
+    address public wine;
 
     address public boardroom;
     address public grapeOracle;
@@ -121,7 +121,7 @@ contract Treasury is ContractGuard {
         require(
             IBasisAsset(grape).operator() == address(this) &&
                 IBasisAsset(gbond).operator() == address(this) &&
-                IBasisAsset(gshare).operator() == address(this) &&
+                IBasisAsset(wine).operator() == address(this) &&
                 Operator(boardroom).operator() == address(this),
             "Treasury: need more permission"
         );
@@ -233,14 +233,14 @@ contract Treasury is ContractGuard {
     function initialize(
         address _grape,
         address _gbond,
-        address _gshare,
+        address _wine,
         address _grapeOracle,
         address _boardroom,
         uint256 _startTime
     ) public notInitialized {
         grape = _grape;
         gbond = _gbond;
-        gshare = _gshare;
+        wine = _wine;
         grapeOracle = _grapeOracle;
         boardroom = _boardroom;
         startTime = _startTime;
@@ -249,7 +249,7 @@ contract Treasury is ContractGuard {
         grapePriceCeiling = grapePriceOne.mul(101).div(100);
 
         // Dynamic max expansion percent
-        supplyTiers = [0 ether, 5000 ether, 10000 ether, 15000 ether, 25000 ether, 50000 ether, 100000 ether, 200000 ether, 500000 ether];
+        supplyTiers = [0 ether, 10000 ether, 20000 ether, 30000 ether, 40000 ether, 50000 ether, 100000 ether, 200000 ether, 500000 ether];
         maxExpansionTiers = [450, 400, 350, 300, 250, 200, 150, 125, 100];
 
         maxSupplyExpansionPercent = 400; // Upto 4.0% supply for expansion
@@ -257,13 +257,13 @@ contract Treasury is ContractGuard {
         bondDepletionFloorPercent = 10000; // 100% of Bond supply for depletion floor
         seigniorageExpansionFloorPercent = 3500; // At least 35% of expansion reserved for boardroom
         maxSupplyContractionPercent = 300; // Upto 3.0% supply for contraction (to burn GRAPE and mint GBOND)
-        maxDebtRatioPercent = 3500; // Upto 35% supply of GBOND to purchase
+        maxDebtRatioPercent = 4000; // Upto 40% supply of GBOND to purchase
 
         premiumThreshold = 110;
         premiumPercent = 7000;
 
-        // First 28 epochs with 4.5% expansion
-        bootstrapEpochs = 28;
+        // First 14 epochs with 4.5% expansion
+        bootstrapEpochs = 14;
         bootstrapSupplyExpansionPercent = 450;
 
         // set seigniorageSaved to it's balance
@@ -346,9 +346,9 @@ contract Treasury is ContractGuard {
         uint256 _devFundSharedPercent
     ) external onlyOperator {
         require(_daoFund != address(0), "zero");
-        require(_daoFundSharedPercent <= 3000, "out of range"); // <= 30%
+        require(_daoFundSharedPercent <= 2500, "out of range"); // <= 25%
         require(_devFund != address(0), "zero");
-        require(_devFundSharedPercent <= 1000, "out of range"); // <= 10%
+        require(_devFundSharedPercent <= 500, "out of range"); // <= 5%
         daoFund = _daoFund;
         daoFundSharedPercent = _daoFundSharedPercent;
         devFund = _devFund;
@@ -540,7 +540,7 @@ contract Treasury is ContractGuard {
         // do not allow to drain core tokens
         require(address(_token) != address(grape), "grape");
         require(address(_token) != address(gbond), "bond");
-        require(address(_token) != address(gshare), "share");
+        require(address(_token) != address(wine), "share");
         _token.safeTransfer(_to, _amount);
     }
 
