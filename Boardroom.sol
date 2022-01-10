@@ -69,7 +69,7 @@ contract Boardroom is ShareWrapper, ContractGuard {
     // flags
     bool public initialized = false;
 
-    IERC20 public graoe;
+    IERC20 public grape;
     ITreasury public treasury;
 
     mapping(address => Memberseat) public members;
