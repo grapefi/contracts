@@ -6,9 +6,9 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 
-// Note that this pool has no minter key of gSHARE (rewards).
-// Instead, the governance will call gSHARE distributeReward method and send reward to this pool at the beginning.
-contract GShareRewardPool {
+// Note that this pool has no minter key of wine (rewards).
+// Instead, the governance will call wine distributeReward method and send reward to this pool at the beginning.
+contract WineRewardPool {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
@@ -24,13 +24,13 @@ contract GShareRewardPool {
     // Info of each pool.
     struct PoolInfo {
         IERC20 token; // Address of LP token contract.
-        uint256 allocPoint; // How many allocation points assigned to this pool. gSHAREs to distribute per block.
-        uint256 lastRewardTime; // Last time that gSHAREs distribution occurs.
-        uint256 accGSharePerShare; // Accumulated gSHAREs per share, times 1e18. See below.
+        uint256 allocPoint; // How many allocation points assigned to this pool. Wine to distribute per block.
+        uint256 lastRewardTime; // Last time that wine distribution occurs.
+        uint256 accWinePerShare; // Accumulated wine per share, times 1e18. See below.
         bool isStarted; // if lastRewardTime has passed
     }
 
-    IERC20 public gshare;
+    IERC20 public wine;
 
     // Info of each pool.
     PoolInfo[] public poolInfo;
@@ -41,13 +41,13 @@ contract GShareRewardPool {
     // Total allocation points. Must be the sum of all allocation points in all pools.
     uint256 public totalAllocPoint = 0;
 
-    // The time when gSHARE mining starts.
+    // The time when wine mining starts.
     uint256 public poolStartTime;
 
-    // The time when gSHARE mining ends.
+    // The time when wine mining ends.
     uint256 public poolEndTime;
 
-    uint256 public gSharePerSecond = 0.00128253 ether; // 41000 gshare / (370 days * 24h * 60min * 60s)
+    uint256 public winePerSecond = 0.00128253 ether; // 41000 wine / (370 days * 24h * 60min * 60s)
     uint256 public runningTime = 370 days; // 370 days
     uint256 public constant TOTAL_REWARDS = 41000 ether;
 
@@ -57,25 +57,25 @@ contract GShareRewardPool {
     event RewardPaid(address indexed user, uint256 amount);
 
     constructor(
-        address _gshare,
+        address _wine,
         uint256 _poolStartTime
     ) public {
         require(block.timestamp < _poolStartTime, "late");
-        if (_gshare != address(0)) gshare = IERC20(_gshare);
+        if (_wine != address(0)) wine = IERC20(_wine);
         poolStartTime = _poolStartTime;
         poolEndTime = poolStartTime + runningTime;
         operator = msg.sender;
     }
 
     modifier onlyOperator() {
-        require(operator == msg.sender, "GShareRewardPool: caller is not the operator");
+        require(operator == msg.sender, "WineRewardPool: caller is not the operator");
         _;
     }
 
     function checkPoolDuplicate(IERC20 _token) internal view {
         uint256 length = poolInfo.length;
         for (uint256 pid = 0; pid < length; ++pid) {
-            require(poolInfo[pid].token != _token, "GShareRewardPool: existing pool?");
+            require(poolInfo[pid].token != _token, "WineRewardPool: existing pool?");
         }
     }
 
@@ -112,7 +112,7 @@ contract GShareRewardPool {
             token : _token,
             allocPoint : _allocPoint,
             lastRewardTime : _lastRewardTime,
-            accGSharePerShare : 0,
+            accWinePerShare : 0,
             isStarted : _isStarted
             }));
         if (_isStarted) {
@@ -120,7 +120,7 @@ contract GShareRewardPool {
         }
     }
 
-    // Update the given pool's gSHARE allocation point. Can only be called by the owner.
+    // Update the given pool's wine allocation point. Can only be called by the owner.
     function set(uint256 _pid, uint256 _allocPoint) public onlyOperator {
         massUpdatePools();
         PoolInfo storage pool = poolInfo[_pid];
@@ -137,27 +137,27 @@ contract GShareRewardPool {
         if (_fromTime >= _toTime) return 0;
         if (_toTime >= poolEndTime) {
             if (_fromTime >= poolEndTime) return 0;
-            if (_fromTime <= poolStartTime) return poolEndTime.sub(poolStartTime).mul(gSharePerSecond);
-            return poolEndTime.sub(_fromTime).mul(gSharePerSecond);
+            if (_fromTime <= poolStartTime) return poolEndTime.sub(poolStartTime).mul(winePerSecond);
+            return poolEndTime.sub(_fromTime).mul(winePerSecond);
         } else {
             if (_toTime <= poolStartTime) return 0;
-            if (_fromTime <= poolStartTime) return _toTime.sub(poolStartTime).mul(gSharePerSecond);
-            return _toTime.sub(_fromTime).mul(gSharePerSecond);
+            if (_fromTime <= poolStartTime) return _toTime.sub(poolStartTime).mul(winePerSecond);
+            return _toTime.sub(_fromTime).mul(winePerSecond);
         }
     }
 
-    // View function to see pending gSHAREs on frontend.
+    // View function to see pending Wine on frontend.
     function pendingShare(uint256 _pid, address _user) external view returns (uint256) {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][_user];
-        uint256 accGSharePerShare = pool.accGSharePerShare;
+        uint256 accWinePerShare = pool.accWinePerShare;
         uint256 tokenSupply = pool.token.balanceOf(address(this));
         if (block.timestamp > pool.lastRewardTime && tokenSupply != 0) {
             uint256 _generatedReward = getGeneratedReward(pool.lastRewardTime, block.timestamp);
-            uint256 _gshareReward = _generatedReward.mul(pool.allocPoint).div(totalAllocPoint);
-            accGSharePerShare = accGSharePerShare.add(_gshareReward.mul(1e18).div(tokenSupply));
+            uint256 _wineReward = _generatedReward.mul(pool.allocPoint).div(totalAllocPoint);
+            accWinePerShare = accWinePerShare.add(_wineReward.mul(1e18).div(tokenSupply));
         }
-        return user.amount.mul(accGSharePerShare).div(1e18).sub(user.rewardDebt);
+        return user.amount.mul(accWinePerShare).div(1e18).sub(user.rewardDebt);
     }
 
     // Update reward variables for all pools. Be careful of gas spending!
@@ -185,8 +185,8 @@ contract GShareRewardPool {
         }
         if (totalAllocPoint > 0) {
             uint256 _generatedReward = getGeneratedReward(pool.lastRewardTime, block.timestamp);
-            uint256 _gshareReward = _generatedReward.mul(pool.allocPoint).div(totalAllocPoint);
-            pool.accGSharePerShare = pool.accGSharePerShare.add(_gshareReward.mul(1e18).div(tokenSupply));
+            uint256 _wineReward = _generatedReward.mul(pool.allocPoint).div(totalAllocPoint);
+            pool.accWinePerShare = pool.accWinePerShare.add(_wineReward.mul(1e18).div(tokenSupply));
         }
         pool.lastRewardTime = block.timestamp;
     }
@@ -198,9 +198,9 @@ contract GShareRewardPool {
         UserInfo storage user = userInfo[_pid][_sender];
         updatePool(_pid);
         if (user.amount > 0) {
-            uint256 _pending = user.amount.mul(pool.accGSharePerShare).div(1e18).sub(user.rewardDebt);
+            uint256 _pending = user.amount.mul(pool.accWinePerShare).div(1e18).sub(user.rewardDebt);
             if (_pending > 0) {
-                safeGShareTransfer(_sender, _pending);
+                safeWineTransfer(_sender, _pending);
                 emit RewardPaid(_sender, _pending);
             }
         }
@@ -208,7 +208,7 @@ contract GShareRewardPool {
             pool.token.safeTransferFrom(_sender, address(this), _amount);
             user.amount = user.amount.add(_amount);
         }
-        user.rewardDebt = user.amount.mul(pool.accGSharePerShare).div(1e18);
+        user.rewardDebt = user.amount.mul(pool.accWinePerShare).div(1e18);
         emit Deposit(_sender, _pid, _amount);
     }
 
@@ -219,16 +219,16 @@ contract GShareRewardPool {
         UserInfo storage user = userInfo[_pid][_sender];
         require(user.amount >= _amount, "withdraw: not good");
         updatePool(_pid);
-        uint256 _pending = user.amount.mul(pool.accGSharePerShare).div(1e18).sub(user.rewardDebt);
+        uint256 _pending = user.amount.mul(pool.accWinePerShare).div(1e18).sub(user.rewardDebt);
         if (_pending > 0) {
-            safeGShareTransfer(_sender, _pending);
+            safeWineTransfer(_sender, _pending);
             emit RewardPaid(_sender, _pending);
         }
         if (_amount > 0) {
             user.amount = user.amount.sub(_amount);
             pool.token.safeTransfer(_sender, _amount);
         }
-        user.rewardDebt = user.amount.mul(pool.accGSharePerShare).div(1e18);
+        user.rewardDebt = user.amount.mul(pool.accWinePerShare).div(1e18);
         emit Withdraw(_sender, _pid, _amount);
     }
 
@@ -243,14 +243,14 @@ contract GShareRewardPool {
         emit EmergencyWithdraw(msg.sender, _pid, _amount);
     }
 
-    // Safe gshare transfer function, just in case if rounding error causes pool to not have enough gSHAREs.
-    function safeGShareTransfer(address _to, uint256 _amount) internal {
-        uint256 _gshareBal = gshare.balanceOf(address(this));
-        if (_gshareBal > 0) {
-            if (_amount > _gshareBal) {
-                gshare.safeTransfer(_to, _gshareBal);
+    // Safe wine transfer function, just in case if rounding error causes pool to not have enough wine.
+    function safeWineTransfer(address _to, uint256 _amount) internal {
+        uint256 _wineBal = wine.balanceOf(address(this));
+        if (_wineBal > 0) {
+            if (_amount > _wineBal) {
+                wine.safeTransfer(_to, _wineBal);
             } else {
-                gshare.safeTransfer(_to, _amount);
+                wine.safeTransfer(_to, _amount);
             }
         }
     }
@@ -261,8 +261,8 @@ contract GShareRewardPool {
 
     function governanceRecoverUnsupported(IERC20 _token, uint256 amount, address to) external onlyOperator {
         if (block.timestamp < poolEndTime + 90 days) {
-            // do not allow to drain core token (gSHARE or lps) if less than 90 days after pool ends
-            require(_token != gshare, "gshare");
+            // do not allow to drain core token (wine or lps) if less than 90 days after pool ends
+            require(_token != wine, "wine");
             uint256 length = poolInfo.length;
             for (uint256 pid = 0; pid < length; ++pid) {
                 PoolInfo storage pool = poolInfo[pid];
