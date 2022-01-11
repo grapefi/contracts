@@ -34,12 +34,27 @@ contract Grape is ERC20Burnable, Operator {
     // Have the rewards been distributed to the pools
     bool public rewardPoolDistributed = false;
 
+    address public grapeOracle;
+
     /**
      * @notice Constructs the GRAPE ERC-20 contract.
      */
     constructor() public ERC20("Grape Finance", "GRAPE") {
         // Mints 1 GRAPE to contract creator for initial pool setup
         _mint(msg.sender, 1 ether);   
+    }
+
+    function _getGrapePrice() internal view returns (uint256 _grapePrice) {
+        try IOracle(grapeOracle).consult(address(this), 1e18) returns (uint144 _price) {
+            return uint256(_price);
+        } catch {
+            revert("Grape: failed to fetch GRAPE price from Oracle");
+        }
+    }
+
+    function setGrapeOracle(address _grapeOracle) public onlyOperator {
+        require(_grapeOracle != address(0), "oracle address cannot be 0 address");
+        grapeOracle = _grapeOracle;
     }
 
     /**
